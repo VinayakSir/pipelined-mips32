@@ -64,6 +64,12 @@ Mem[100]   = 22 (expect 22)
 ======================================
 ```
 
+### Waveform
+
+![Pipeline waveform](docs/waveform.png)
+
+The waveform above shows the pipeline in action: `PC` incrementing each cycle, instructions flowing through `IF_ID → ID_EX → EX_MEM → MEM_WB`, the `fwdA`/`fwdB` forwarding-mux selects activating (values 1/2) whenever a data hazard is detected, and registers `R3`–`R9` settling into their expected final values (0x11 = 17, 0x07 = 7, 0x04 = 4, 0xd = 13, 0x3c = 60) as each instruction completes write-back.
+
 ## Design challenges & fixes
 
 A few non-obvious issues came up while getting this from "simulates" to "synthesizable and correct":
