@@ -20,39 +20,6 @@
 //    Branch   : BEQZ, BNEQZ
 //    Misc     : HLT
 //
-//  FIX LOG:
-//    - TAKEN_BRANCH was previously driven from TWO separate always
-//      blocks (IF stage set it to 1, EX stage cleared it to 0),
-//      both triggered on posedge clk1. Verilog simulators tolerate
-//      multiple drivers on a reg (with implementation-defined
-//      ordering), but Vivado's synthesizer/elaborator rejects this
-//      as a "multiply driven signal" error -- this was blocking RTL
-//      generation. Fixed by merging both actions into the single
-//      IF-stage always block, so TAKEN_BRANCH now has exactly one
-//      driver.
-//    - Added output ports (PC_out, IR_out, ALUOut_out, LMD_out,
-//      HALTED_out) since the module previously had none, which
-//      caused synthesis to optimize the entire design away into
-//      an empty netlist (nothing was reachable from a primary
-//      output).
-//    - Added EX/MEM and MEM/WB-to-EX data forwarding (fwdA/fwdB
-//      muxes) to correctly resolve RAW hazards between
-//      back-to-back dependent instructions (e.g. ADDI R8,... 
-//      immediately followed by SW R8,...), instead of relying on
-//      manually inserted NOPs in the test program.
-//    - Added missing `timescale directive (was present in testbench.v
-//      but absent here) -- without it the #2 intra-assignment delays
-//      in this file don't line up with the testbench's 1ns/1ns clock,
-//      and the whole pipeline silently deadlocks (PC never advances).
-//    - Added a proper synchronous, active-high `rst` to every pipeline
-//      stage and the register file. Previously ALL state (PC, HALTED,
-//      pipeline latches, Reg[]) relied on the *testbench* forcing
-//      initial values via hierarchical references (uut.PC = 0, etc.),
-//      which only works in simulation. With no defined power-up state
-//      in the RTL itself, Yosys's optimizer could prove every register
-//      was permanently unreachable/undefined and deleted the entire
-//      design during synthesis (0 cells in the netlist).
-// =============================================================
 
 `timescale 1ns/1ns
 
